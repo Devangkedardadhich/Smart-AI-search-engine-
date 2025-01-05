@@ -1,0 +1,165 @@
+
+# Install required libraries
+# pip install streamlit langchain llama-index sentence-transformers faiss-cpu
+
+import streamlit as st
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
+from llama_index import SimpleKeywordTableIndex, GPTListIndex
+from langchain.llms import OpenAI
+import os
+
+# Load Data
+def load_data():
+    """
+    Load course data from JSON or CSV format. Replace this with your actual data source.
+    Example data structure:
+        [
+            {"title": "Course 1", "description": "Introduction to AI", "curriculum": "Basics of AI"},
+            ...
+        ]
+    """
+    return [
+        {"title": "Python for Data Science",
+         "description": "Learn Python programming and its application in data science.",
+         "curriculum": "Python basics, Numpy, Pandas, Matplotlib, Machine Learning basics."},
+        {"title": "Statistics for Data Science",
+         "description": "Understand the fundamental statistics concepts.",
+         "curriculum": "Mean, Median, Variance, Hypothesis Testing, Regression."},
+        # Add more course entries
+    ]
+
+# Embed Data and Store in FAISS
+def create_faiss_store(data):
+    # Extract course metadata
+    texts = [f"{item['title']} {item['description']} {item['curriculum']}" for item in data]
+    metadata = [{"title": item["title"], "description": item["description"]} for item in data]
+
+    # Generate embeddings
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    faiss_store = FAISS.from_texts(texts, embeddings, metadatas=metadata)
+    return faiss_store
+
+# Build the Search Tool
+def build_search_tool(faiss_store):
+    retriever = faiss_store.as_retriever()
+    llm = OpenAI(model="text-davinci-003", temperature=0)
+    prompt = PromptTemplate(input_variables=["context", "question"], template="""
+    You are an intelligent assistant helping users find free courses.
+    Based on the following data:
+    {context}
+    Answer the question: {question}
+    """)
+    qa_chain = RetrievalQA(llm=llm, retriever=retriever, prompt=prompt)
+    return qa_chain
+
+# Streamlit Interface
+def app():
+    # Load data and initialize FAISS
+    st.title("Smart Search Tool for Analytics Vidhya Free Courses")
+    st.write("Find the best free courses available on Analytics Vidhya.")
+
+    with st.spinner("Loading course data..."):
+        data = load_data()
+        faiss_store = create_faiss_store(data)
+        search_tool = build_search_tool(faiss_store)
+
+    # User Input
+    query = st.text_input("Enter your query (e.g., Python courses, basics of statistics):")
+    if query:
+        with st.spinner("Searching for relevant courses..."):
+            response = search_tool.run(query)
+            st.write("### Relevant Courses:")
+            st.write(response)
+```python
+# Install required libraries
+# pip install streamlit langchain llama-index sentence-transformers faiss-cpu
+
+import streamlit as st
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
+from llama_index import SimpleKeywordTableIndex, GPTListIndex
+from langchain.llms import OpenAI
+import os
+
+# Load Data
+def load_data():
+    """
+    Load course data from JSON or CSV format. Replace this with your actual data source.
+    Example data structure:
+        [
+            {"title": "Course 1", "description": "Introduction to AI", "curriculum": "Basics of AI"},
+            ...
+        ]
+    """
+    return [
+        {"title": "Python for Data Science",
+         "description": "Learn Python programming and its application in data science.",
+         "curriculum": "Python basics, Numpy, Pandas, Matplotlib, Machine Learning basics."},
+        {"title": "Statistics for Data Science",
+         "description": "Understand the fundamental statistics concepts.",
+         "curriculum": "Mean, Median, Variance, Hypothesis Testing, Regression."},
+        # Add more course entries
+    ]
+
+# Embed Data and Store in FAISS
+def create_faiss_store(data):
+    # Extract course metadata
+    texts = [f"{item['title']} {item['description']} {item['curriculum']}" for item in data]
+    metadata = [{"title": item["title"], "description": item["description"]} for item in data]
+
+    # Generate embeddings
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    faiss_store = FAISS.from_texts(texts, embeddings, metadatas=metadata)
+    return faiss_store
+
+# Build the Search Tool
+def build_search_tool(faiss_store):
+    retriever = faiss_store.as_retriever()
+    llm = OpenAI(model="text-davinci-003", temperature=0)
+    prompt = PromptTemplate(input_variables=["context", "question"], template="""
+    You are an intelligent assistant helping users find free courses.
+    Based on the following data:
+    {context}
+    Answer the question: {question}
+    """)
+    qa_chain = RetrievalQA(llm=llm, retriever=retriever, prompt=prompt)
+    return qa_chain
+
+# Streamlit Interface
+def app():
+    # Load data and initialize FAISS
+    st.title("Smart Search Tool for Analytics Vidhya Free Courses")
+    st.write("Find the best free courses available on Analytics Vidhya.")
+
+    with st.spinner("Loading course data..."):
+        data = load_data()
+        faiss_store = create_faiss_store(data)
+        search_tool = build_search_tool(faiss_store)
+
+    # User Input
+    query = st.text_input("Enter your query (e.g., Python courses, basics of statistics):")
+    if query:
+        with st.spinner("Searching for relevant courses..."):
+            response = search_tool.run(query)
+            st.write("### Relevant Courses:")
+            st.write(response)
+
+if __name__ == "__main__":
+    app()
+```
+pip install streamlit langchain llama-index sentence-transformers faiss-cpu
+
+streamlit run app.py
+streamlit run app.py
+
+streamlit
+langchain
+llama-index
+sentence-transformers
+faiss-cpu
+openai
